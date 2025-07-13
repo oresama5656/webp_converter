@@ -14,3 +14,4 @@ Thumbs.db
 temp_uploads/
 converted_files/
 *.tmp
+.vercel

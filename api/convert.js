@@ -1,5 +1,5 @@
 const sharp = require('sharp');
-const formidable = require('formidable');
+const { formidable } = require('formidable');
 const fs = require('fs').promises;
 const path = require('path');
 
