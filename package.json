@@ -1,0 +1,29 @@
+{
+  "name": "webp-converter-v2",
+  "version": "2.0.0",
+  "description": "Advanced WebP image converter with upscaling",
+  "main": "api/convert.js",
+  "scripts": {
+    "dev": "node dev-server.js",
+    "dev:vercel": "vercel dev",
+    "build": "echo 'Build completed'",
+    "start": "node dev-server.js"
+  },
+  "dependencies": {
+    "sharp": "^0.33.0",
+    "formidable": "^3.5.1",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  },
+  "keywords": [
+    "webp",
+    "image",
+    "converter",
+    "upscaling",
+    "sharp"
+  ],
+  "author": "",
+  "license": "MIT"
+}

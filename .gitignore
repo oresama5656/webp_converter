@@ -1,0 +1,16 @@
+node_modules/
+.env
+.env.local
+.vercel
+.netlify
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+temp_uploads/
+converted_files/
+*.tmp

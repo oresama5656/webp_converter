@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebP Converter V2 - Advanced Image Processing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
+            max-width: 700px;
+            width: 100%;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .upload-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 20px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            margin-bottom: 32px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .upload-area:hover::before {
+            left: 100%;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+        }
+
+        .upload-area.dragover {
+            border-color: #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            color: #667eea;
+        }
+
+        .upload-text {
+            font-size: 1.3rem;
+            color: #374151;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .upload-subtext {
+            color: #6b7280;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .settings-panel {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 32px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .settings-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .setting-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .setting-label {
+            font-weight: 500;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scale-input {
+            width: 120px;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .scale-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            accent-color: #667eea;
+            cursor: pointer;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 32px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        .progress-container {
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .log-panel {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            height: 240px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .log-time {
+            color: #64748b;
+            flex-shrink: 0;
+        }
+
+        .log-success { color: #10b981; }
+        .log-error { color: #ef4444; }
+        .log-info { color: #3b82f6; }
+        .log-warning { color: #f59e0b; }
+
+        .processing-files {
+            display: none;
+            margin-top: 24px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .file-status {
+            font-size: 0.9rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-processing { background: #dbeafe; color: #1e40af; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-error { background: #fee2e2; color: #991b1b; }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px;
+                margin: 10px;
+            }
+            
+            .title {
+                font-size: 2.2rem;
+            }
+            
+            .upload-area {
+                padding: 40px 16px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .setting-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .scale-input {
+                width: 100%;
+            }
+        }
+
+        .download-area {
+            display: none;
+            margin-top: 24px;
+            padding: 24px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .download-title {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .download-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 8px;
+        }
+
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🔥 WebP Converter V2</h1>
+            <p class="subtitle">高品質画像変換ツール - アップスケール対応</p>
+        </div>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📸</div>
+            <div class="upload-text">画像ファイルまたはフォルダをドロップ</div>
+            <div class="upload-subtext">
+                対応形式: PNG, JPG, JPEG, WebP<br>
+                フォルダドラッグ＆ドロップにも対応
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                📁 ファイルを選択
+            </button>
+            <button class="btn btn-secondary" onclick="document.getElementById('folderInput').click()">
+                📂 フォルダを選択
+            </button>
+        </div>
+
+        <input type="file" id="fileInput" class="file-input" multiple accept=".png,.jpg,.jpeg,.webp">
+        <input type="file" id="folderInput" class="file-input" multiple webkitdirectory>
+
+        <div class="settings-panel">
+            <div class="settings-title">
+                ⚙️ 変換設定
+            </div>
+            <div class="setting-row">
+                <label class="setting-label">
+                    📏 最終縮小率:
+                </label>
+                <input type="number" id="scaleInput" class="scale-input" value="0.8" min="0.1" max="1.0" step="0.1">
+            </div>
+            <div class="setting-row">
+                <label class="setting-label">
+                    ✨ 高品質アップスケール:
+                </label>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="upscaleCheckbox" class="checkbox" checked>
+                    <span>有効にする（小さい画像を拡大してから縮小）</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">準備中...</div>
+        </div>
+
+        <div class="processing-files" id="processingFiles">
+            <h3 style="margin-bottom: 16px; color: #374151;">処理中のファイル:</h3>
+            <div id="fileList"></div>
+        </div>
+
+        <div class="download-area" id="downloadArea">
+            <div class="download-title">✅ 変換完了！</div>
+            <div id="downloadButtons"></div>
+        </div>
+
+        <div class="log-panel" id="logPanel">
+            <div class="log-entry">
+                <span class="log-time">[起動]</span>
+                <span class="log-info">WebP Converter V2 が起動しました 🚀</span>
+            </div>
+            <div class="log-entry">
+                <span class="log-time">[準備完了]</span>
+                <span class="log-success">ファイルをドラッグ＆ドロップしてください</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const folderInput = document.getElementById('folderInput');
+        const scaleInput = document.getElementById('scaleInput');
+        const upscaleCheckbox = document.getElementById('upscaleCheckbox');
+        const logPanel = document.getElementById('logPanel');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const processingFiles = document.getElementById('processingFiles');
+        const fileList = document.getElementById('fileList');
+        const downloadArea = document.getElementById('downloadArea');
+        const downloadButtons = document.getElementById('downloadButtons');
+
+        // ドラッグ＆ドロップイベント
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            uploadArea.classList.add('dragover');
+        }
+
+        function unhighlight() {
+            uploadArea.classList.remove('dragover');
+        }
+
+        uploadArea.addEventListener('drop', handleDrop, false);
+
+        async function handleDrop(e) {
+            const items = e.dataTransfer.items;
+            const files = [];
+            
+            if (items && items.length > 0) {
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    if (item.kind === 'file') {
+                        const entry = item.webkitGetAsEntry();
+                        if (entry) {
+                            const entryFiles = await getAllFilesFromEntry(entry);
+                            files.push(...entryFiles);
+                        }
+                    }
+                }
+            } else {
+                files.push(...Array.from(e.dataTransfer.files));
+            }
+            
+            handleFiles(files);
+        }
+
+        // ファイル選択イベント
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(Array.from(e.target.files));
+        });
+
+        folderInput.addEventListener('change', (e) => {
+            handleFiles(Array.from(e.target.files));
+        });
+
+        // エントリからファイルを再帰的に取得
+        async function getAllFilesFromEntry(entry) {
+            const files = [];
+            
+            if (entry.isFile) {
+                const file = await new Promise(resolve => entry.file(resolve));
+                if (isImageFile(file)) {
+                    files.push(file);
+                }
+            } else if (entry.isDirectory) {
+                const reader = entry.createReader();
+                const entries = await new Promise(resolve => {
+                    reader.readEntries(resolve);
+                });
+                
+                for (const subEntry of entries) {
+                    const subFiles = await getAllFilesFromEntry(subEntry);
+                    files.push(...subFiles);
+                }
+            }
+            
+            return files;
+        }
+
+        function isImageFile(file) {
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+            return allowedTypes.includes(file.type);
+        }
+
+        async function handleFiles(files) {
+            if (files.length === 0) {
+                addLog('⚠️ 処理可能な画像ファイルがありません', 'warning');
+                return;
+            }
+
+            const imageFiles = files.filter(isImageFile);
+            if (imageFiles.length === 0) {
+                addLog('❌ 対応していないファイル形式です', 'error');
+                return;
+            }
+
+            const scale = parseFloat(scaleInput.value);
+            const upscale = upscaleCheckbox.checked;
+
+            if (scale < 0.1 || scale > 1.0) {
+                addLog('❌ 縮小率は0.1〜1.0の範囲で指定してください', 'error');
+                return;
+            }
+
+            addLog(`🔄 ${imageFiles.length}個のファイルの処理を開始します...`, 'info');
+            
+            // UI状態を更新
+            progressContainer.style.display = 'block';
+            processingFiles.style.display = 'block';
+            downloadArea.style.display = 'none';
+            
+            // ファイルリストを表示
+            displayFileList(imageFiles);
+            
+            try {
+                await processFiles(imageFiles, scale, upscale);
+            } catch (error) {
+                addLog(`❌ エラーが発生しました: ${error.message}`, 'error');
+            }
+        }
+
+        function displayFileList(files) {
+            fileList.innerHTML = '';
+            files.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-status status-pending" id="status-${index}">待機中</span>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function updateFileStatus(index, status, statusClass) {
+            const statusElement = document.getElementById(`status-${index}`);
+            if (statusElement) {
+                statusElement.textContent = status;
+                statusElement.className = `file-status ${statusClass}`;
+            }
+        }
+
+        async function processFiles(files, scale, upscale) {
+            const formData = new FormData();
+            
+            files.forEach((file, index) => {
+                formData.append('files', file);
+                updateFileStatus(index, '処理中...', 'status-processing');
+            });
+            
+            formData.append('scale', scale);
+            formData.append('upscale', upscale);
+
+            progressText.textContent = 'サーバーに送信中...';
+            progressFill.style.width = '10%';
+
+            try {
+                const response = await fetch('/api/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                progressFill.style.width = '50%';
+                progressText.textContent = '変換処理中...';
+
+                const result = await response.json();
+
+                if (result.success) {
+                    progressFill.style.width = '100%';
+                    progressText.textContent = '完了！';
+                    
+                    files.forEach((file, index) => {
+                        updateFileStatus(index, '完了', 'status-completed');
+                    });
+
+                    addLog(`✅ ${files.length}個のファイルの変換が完了しました！`, 'success');
+                    
+                    // ダウンロードボタンを表示
+                    showDownloadButtons(result.files);
+                    
+                } else {
+                    throw new Error(result.error || '変換に失敗しました');
+                }
+
+            } catch (error) {
+                files.forEach((file, index) => {
+                    updateFileStatus(index, 'エラー', 'status-error');
+                });
+                throw error;
+            }
+        }
+
+        function showDownloadButtons(files) {
+            downloadArea.style.display = 'block';
+            downloadButtons.innerHTML = '';
+
+            if (files.length === 1) {
+                const file = files[0];
+                const btn = document.createElement('a');
+                btn.className = 'download-btn';
+                btn.href = `data:image/webp;base64,${file.data}`;
+                btn.download = file.name;
+                btn.textContent = `📥 ${file.name} をダウンロード`;
+                downloadButtons.appendChild(btn);
+            } else {
+                files.forEach(file => {
+                    const btn = document.createElement('a');
+                    btn.className = 'download-btn';
+                    btn.href = `data:image/webp;base64,${file.data}`;
+                    btn.download = file.name;
+                    btn.textContent = `📥 ${file.name}`;
+                    downloadButtons.appendChild(btn);
+                });
+            }
+
+            addLog(`📥 ダウンロードボタンが表示されました`, 'success');
+        }
+
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            const time = new Date().toLocaleTimeString();
+            entry.innerHTML = `
+                <span class="log-time">[${time}]</span>
+                <span class="log-${type}">${message}</span>
+            `;
+            
+            logPanel.appendChild(entry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        // 初期化ログ
+        setTimeout(() => {
+            addLog('🎯 アップスケール機能が有効です', 'info');
+            addLog('⚡ 高速処理のためにSharp.jsを使用します', 'info');
+        }, 1000);
+    </script>
+</body>
+</html>
